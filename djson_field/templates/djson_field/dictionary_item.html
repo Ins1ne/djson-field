@@ -1,0 +1,11 @@
+<ul class="jsonFieldDict jsonFieldItemValue"
+		name="{{ name }}">
+	{% for key, item in items.iteritems %}
+		<li class="jsonFieldItem">
+			<a href="#" class="deleteItem">Удалить</a>
+			<label for="id_{{ name }}[_{{ key }}]">{{ key }}</label>
+			{{ item|safe }}
+		</li>
+	{% endfor %}
+	{{ controls|safe }}
+</ul>

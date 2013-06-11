@@ -1,0 +1,10 @@
+<ol class="jsonFieldList jsonFieldItemValue"
+		name="{{ name }}">
+	{% for item in items %}
+		<li class="jsonFieldItem">
+			<a href="#" class="deleteItem">Удалить</a>
+			{{ item|safe }}
+		</li>
+	{% endfor %}
+	{{ controls|safe }}
+</ol>
