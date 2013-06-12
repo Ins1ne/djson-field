@@ -1,2 +1,6 @@
-<input id="id_{{ name }}" class="jsonFieldItemValue"
-		name="{{ name }}" value="{{ value }}" />
+{% if field %}
+	{{ field }}
+{% else %}
+	<input id="id_{{ name }}" class="jsonFieldItemValue"
+			name="{{ name }}" value="{{ value }}" />
+{% endif %}
