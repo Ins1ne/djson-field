@@ -17,26 +17,39 @@ $(document).ready(function(e){
 			isLabel = false;
 			var name = list.attr('name') + '[' + key + ']';
 		}
+		if(key==null) return null;
 		var label = "<label>" + key + "</label>";
-		if($(this).hasClass("plain")){
-			var item = $('.jsonFieldWidget').has($(this)).find(".templates>.plain").html().replace(/%%NAME%%/g, name);
-		} else if($(this).hasClass("list")){
-			var item = $('.jsonFieldWidget').has($(this)).find(".templates>.list").html().replace(/%%NAME%%/g, name);
-		} else if($(this).hasClass("dict")){
-			var item = $('.jsonFieldWidget').has($(this)).find(".templates>.dict").html().replace(/%%NAME%%/g, name);
+		var templates = getTemplates(list);
+		if(templates.size() > 0){
+			if($(this).hasClass("add_plain")){
+				var item = templates.children(".plain").html().replace(/%%NAME%%/g, name);
+			} else if($(this).hasClass("add_list")){
+				var item = templates.children(".templates>.list").html().replace(/%%NAME%%/g, name);
+			} else if($(this).hasClass("add_dict")){
+				var item = templates.children(".templates>.dict").html().replace(/%%NAME%%/g, name);
+			}
+			var li = "<li class=\"jsonFieldItem\">" +
+						'<a href="#" class="deleteItem">Удалить</a> ' +
+						(isLabel ? label : "") + item + 
+						'</li>';
+			$(this).parent().before(li);
+		} else {
+			alert("Не удалось найти шаблон для сущности");
 		}
-
-		var li = "<li class=\"jsonFieldItem\">" +
-					'<a href="#" class="deleteItem">Удалить</a> ' +
-					(isLabel ? label : "") + item + 
-					'</li>';
-		$(this).parent().before(li);
 	});
 	$('.jsonFieldWidget').delegate('.jsonFieldItem>.deleteItem', 'click', function(e){
 		e.preventDefault()
 		$(this).parent().remove();
 	});
 });
+
+function getTemplates(node){
+	var templates = node.children('.templates');
+	if(templates.size() > 0) return templates;
+	var parent = node.parent();
+	if(parent.size() > 0) return getTemplates(parent);
+	return null;
+}
 
 function getKeys(str){
 	keys = str.match(/\[[a-zA-Z0-9_.]+\]/g);

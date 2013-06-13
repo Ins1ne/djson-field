@@ -1,3 +1,14 @@
+.jsonFieldWidget {display:block; clear:both;}
 .jsonFieldWidget ol {list-style-type:decimal;}
 
 .jsonFieldWidget .templates {display:none;}
+
+.jsonFieldWidget ul.jsonFieldItemValue, .jsonFieldWidget ol.jsonFieldItemValue {display:block;
+	margin-left:25px; padding-left:5px; border:#CCC solid 1px; background-color:rgba(0, 0, 0, 0.03);}
+.jsonFieldWidget ul.jsonFieldItemValue {border-style:solid;}
+.jsonFieldWidget ol.jsonFieldItemValue {border-style:dashed;}
+
+.jsonFieldWidget ul>li, .jsonFieldWidget ol>li {list-style:none; padding:3px 7px;}
+
+.jsonFieldWidget .jsonFieldList>li {margin-right:15px;}
+.jsonFieldWidget .jsonFieldItem {}

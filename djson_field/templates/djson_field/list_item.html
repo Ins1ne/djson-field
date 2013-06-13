@@ -2,9 +2,14 @@
 		name="{{ name }}">
 	{% for item in items %}
 		<li class="jsonFieldItem">
-			<a href="#" class="deleteItem">Удалить</a>
+			{% if rules.allow_removing %}
+				<a href="#" class="deleteItem">Удалить</a>
+			{% endif %}
 			{{ item|safe }}
 		</li>
 	{% endfor %}
 	{{ controls|safe }}
+	{% if templates %}
+		<li class="templates">{% include "djson_field/item_templates.html" %}</li>
+	{% endif %}
 </ol>
