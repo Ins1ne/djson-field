@@ -1,0 +1,3 @@
+{% for key, template in templates.iteritems %}
+	<div class="{{ key }}">{{ template|safe }}</div>
+{% endfor %}

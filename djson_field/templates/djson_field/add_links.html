@@ -1,0 +1,7 @@
+<li class="jsonFieldAddLink">
+	Добавить:
+	{% for action, name in links.iteritems %}
+		<a class="{{ action }}" href="#">{{ name }}</a>
+		{% if not forloop.last %}|{% endif %}
+	{% endfor %}
+</li>
