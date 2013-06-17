@@ -1,5 +1,5 @@
 $(document).ready(function(e){
-	$('.jsonFieldWidget').delegate('.jsonFieldAddLink a', 'click', function(e){
+	$(document).delegate('.jsonFieldWidget .jsonFieldAddLink a', 'click', function(e){
 		e.preventDefault();
 		var list = $(this).parent().parent();
 		var last = list.children('.jsonFieldItem').last();
@@ -37,7 +37,7 @@ $(document).ready(function(e){
 			alert("Не удалось найти шаблон для сущности");
 		}
 	});
-	$('.jsonFieldWidget').delegate('.jsonFieldItem>.deleteItem', 'click', function(e){
+	$(document).delegate('.jsonFieldWidget .jsonFieldItem>.deleteItem', 'click', function(e){
 		e.preventDefault()
 		$(this).parent().remove();
 	});

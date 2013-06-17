@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from django.forms import CharField
 from django.forms.widgets import Textarea
 from django.template.loader import render_to_string
 
@@ -63,23 +62,15 @@ class JSONWidget(Textarea):
         "add_dict": u"словарь",
     }
 
-    BASE_RULES = [
-        ([], {
-            'type': CharField(),
-            'actions': [],
-            'allow_item_removing': False
-        }),
-    ]
-
-    def __init__(self, rules=None, **kwargs):
-        rules = rules or []
-        self.rules = self.BASE_RULES + rules
-        super(JSONWidget, self).__init__(**kwargs)
+    def __init__(self, rules=[], *args, **kwargs):
+        self.rules = rules
+        super(JSONWidget, self).__init__(*args, **kwargs)
 
     def add_links_template(self, rules):
         actions = rules.get('actions', [])
         link_actions = [ob for ob in actions if ob in self.ADD_ACTIONS]
-        links = {key: value for key, value in self.ADD_ACTIONS.iteritems() if key in link_actions}
+        links = {key: value for key, value in self.ADD_ACTIONS.iteritems()
+                 if key in link_actions}
         if len(link_actions) > 0:
             return render_to_string("djson_field/add_links.html", {
                 'links': links,
@@ -96,18 +87,21 @@ class JSONWidget(Textarea):
         return rules
 
     def get_templates(self, path):
-        rules = self.get_rules(path)
         return {
-            'dict': self.render_dict('%%NAME%%', path=path, with_templates=False),
-            'list': self.render_list('%%NAME%%', path=path, with_templates=False),
+            'dict': self.render_dict('%%NAME%%', path=path,
+                                     with_templates=False),
+            'list': self.render_list('%%NAME%%', path=path,
+                                     with_templates=False),
             'plain': self.render_plain('%%NAME%%', path=path)
         }
 
-    def render_dict(self, name, data={}, path=[], rules=None, with_templates=True):
+    def render_dict(self, name, data={}, path=[], rules=None,
+                    with_templates=True):
         rules = rules or self.get_rules(path)
         items = {}
         for key, value in data.iteritems():
-            items[key] = self.render_data("%s[%s]" % (name, "_" + key), value, path + [key])
+            items[key] = self.render_data("%s[%s]" % (name, "_" + key),
+                                          value, path + [key])
         return render_to_string("djson_field/dictionary_item.html", {
             'name': name,
             'items': items,
@@ -116,7 +110,8 @@ class JSONWidget(Textarea):
             'rules': rules
         })
 
-    def render_list(self, name, data=[], path=[], rules=None, with_templates=True):
+    def render_list(self, name, data=[], path=[], rules=None,
+                    with_templates=True):
         rules = rules or self.get_rules(path)
         items = []
         for i in xrange(len(data)):
@@ -136,7 +131,8 @@ class JSONWidget(Textarea):
             field = field.widget.render(name, unicode(data))
             match = re.match(r'<[a-zA-Z0-9._]+\s+', field)
             if match:
-                field = field[:match.end()] + ' class="jsonFieldItemValue" ' + field[match.end():]
+                field = field[:match.end()] + ' class="jsonFieldItemValue" ' +\
+                    field[match.end():]
         return render_to_string("djson_field/plain_item.html", {
             'name': name,
             'field': field,
