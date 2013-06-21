@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from django.core.exceptions import ValidationError
 from django.db import models
-from django.forms import CharField, IntegerField
+from django.forms import CharField
 from djson_field.forms import JsonField
 
 import json
 import re
+import string
 _ = re.compile
 
 
@@ -14,10 +16,10 @@ class JSONField(models.TextField):
 
     description = 'JSON object'
     BASE_RULES = [
-        (['key'], {
-            'type': IntegerField(),
-            'actions': ['add_plain'],
-            'allow_item_removing': False
+        ([_(r'.*')], {
+            'type': CharField(),
+            'actions': ['add_plain', 'add_list', 'add_dict'],
+            'allow_item_removing': True
         }),
     ]
 
@@ -38,20 +40,31 @@ class JSONField(models.TextField):
         defaults.update(kwargs)
         return super(JSONField, self).formfield(**defaults)
 
-    def validate_item(self, item, model_instance, path):
+    def validate_item(self, item, model_instance, path=[]):
         errors = []
         if isinstance(item, dict):
             for key, subitem in item.iteritems():
-                errors += self.validate_item(subitem, model_instance, path + [key])
+                errors += self.validate_item(subitem, model_instance,
+                                             path + [key])
         elif isinstance(item, list):
-            for subitem in item:
-                errors += self.validate_item(subitem, model_instance, path)
+            for i, subitem in enumerate(item):
+                errors += self.validate_item(subitem, model_instance,
+                                             path + [i])
         else:
             field = self.formfield()
+            rules = field.widget.get_rules(path)
+            field_type = rules['type']
+            try:
+                field_type.clean(item)
+            except ValidationError as e:
+                for msg in e.messages:
+                    errors.append(string.join(path, "->") + ": " + msg)
         return errors
-        
 
-    def validate(self, value, model_instance):
+    def clean(self, value, model_instance):
+        cleaned_data = super(JSONField, self).clean(value, model_instance)
         item = json.loads(value)
         errors = self.validate_item(item, model_instance)
-        super(JSONField, self).validate(value, model_instance)
+        if len(errors) > 0:
+            raise ValidationError(errors)
+        return cleaned_data

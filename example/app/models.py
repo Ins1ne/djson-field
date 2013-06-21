@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from django.db import models
-from django.forms import CharField
+from django.forms import IntegerField
 from djson_field.models import JSONField
 
 
 def get_rules():
     return [
-        ([], {
-            'type': CharField(),
+        (['key'], {
+            'type': IntegerField(),
             'actions': ['add_plain'],
             'allow_item_removing': False
         }),
