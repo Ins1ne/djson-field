@@ -12,3 +12,5 @@
 
 .jsonFieldWidget .jsonFieldList>li {margin-right:15px;}
 .jsonFieldWidget .jsonFieldItem {}
+
+.jsonFieldWidget .jsonFieldItemValue>li.hidden {display:none;}

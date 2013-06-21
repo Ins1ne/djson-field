@@ -9,6 +9,7 @@
 			{{ item|safe }}
 		</li>
 	{% endfor %}
+	<li class="hidden"><input name="{{ name }}[_key]" value="__KEEP_DICT__" /></li>
 	{{ controls|safe }}
 	{% if templates %}
 		<li class="templates">{% include "djson_field/item_templates.html" %}</li>

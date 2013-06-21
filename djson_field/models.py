@@ -2,7 +2,6 @@
 
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.forms import CharField
 from djson_field.forms import JsonField
 
 import json
@@ -17,26 +16,32 @@ class JSONField(models.TextField):
     description = 'JSON object'
     BASE_RULES = [
         ([_(r'.*')], {
-            'type': CharField(),
+            'type': models.CharField(max_length=""),
             'actions': ['add_plain', 'add_list', 'add_dict'],
-            'allow_item_removing': True
+            'allow_removing': True
         }),
     ]
 
     def __init__(self, *args, **kwargs):
         self.rules = self.BASE_RULES
+        self.additional_rules = kwargs.get('rules', [])
+        self.initial = kwargs.get('initial', None)
         if 'rules' in kwargs:
-            add_rules = kwargs['rules']
-            if hasattr(add_rules, '__call__'):
-                self.rules += add_rules()
-            else:
-                self.rules += add_rules
             del kwargs['rules']
+        if 'initial' in kwargs:
+            del kwargs['initial']
         super(JSONField, self).__init__(*args, **kwargs)
 
     def formfield(self, **kwargs):
         defaults = {'form_class': JsonField}
-        defaults['rules'] = self.rules
+        add_rules = self.additional_rules
+        if hasattr(add_rules, '__call__'):
+            add_rules = add_rules()
+        defaults['rules'] = self.rules + add_rules
+        initial = self.initial
+        if hasattr(initial, '__call__'):
+            initial = initial()
+        defaults['initial'] = json.dumps(initial)
         defaults.update(kwargs)
         return super(JSONField, self).formfield(**defaults)
 
@@ -55,10 +60,11 @@ class JSONField(models.TextField):
             rules = field.widget.get_rules(path)
             field_type = rules['type']
             try:
-                field_type.clean(item)
+                field_type.clean(item, model_instance)
             except ValidationError as e:
                 for msg in e.messages:
-                    errors.append(string.join(path, "->") + ": " + msg)
+                    path = [unicode(ob) for ob in path]
+                    errors.append(string.join(path, u" -> ") + u": " + unicode(msg))
         return errors
 
     def clean(self, value, model_instance):

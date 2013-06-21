@@ -8,24 +8,27 @@ import re
 
 def update_tree(tree, path, value):
     if len(path) > 0:
+        is_add = value not in ["__KEEP_LIST__", "__KEEP_DICT__"]
         if path[0].isdigit() and (not tree or type(tree) == list):
             if not tree:
                 tree = []
-            index = int(path[0])
-            while len(tree) <= index:
-                tree.append(None)
+            if is_add or len(path) > 1:
+                index = int(path[0])
+                while len(tree) <= index:
+                    tree.append(None)
         else:
             if not tree:
                 tree = {}
-            index = path[0]
-            if index.startswith("_"):
-                index = index[1:]
-            if index not in tree:
-                tree[index] = None
+            if is_add or len(path) > 1:
+                index = path[0]
+                if index.startswith("_"):
+                    index = index[1:]
+
         if len(path) == 1:
-            tree[index] = value
+            if is_add:
+                tree[index] = value
         else:
-            tree[index] = update_tree(tree[index], path[1:], value)
+            tree[index] = update_tree(tree.get(index), path[1:], value)
     return tree
 
 
@@ -44,11 +47,14 @@ def is_satisfy_selectors(selectors, path):
     if len(path) == 0:
         return False
     for i in xrange(1, len(path) + 1):
-        if type(selectors[-1]) in [unicode, str]:
+        if type(selectors[-1]) in [unicode, str, int, long]:
             condition = selectors[-1] == path[-i]
         else:
-            match = re.match(selectors[-1], path[-i])
-            condition = match and match.end() == len(path[-i])
+            node = path[-i]
+            if type(node) in [int, long]:
+                node = str(node)
+            match = re.match(selectors[-1], node)
+            condition = match and match.end() == len(node)
         if condition:
             return is_satisfy_selectors(selectors[:-1], path[:-i])
     return False
@@ -92,7 +98,8 @@ class JSONWidget(Textarea):
                                      with_templates=False),
             'list': self.render_list('%%NAME%%', path=path,
                                      with_templates=False),
-            'plain': self.render_plain('%%NAME%%', path=path)
+            'plain': self.render_plain('%%NAME%%', path=path,
+                                       with_templates=False)
         }
 
     def render_dict(self, name, data={}, path=[], rules=None,
@@ -101,7 +108,7 @@ class JSONWidget(Textarea):
         items = {}
         for key, value in data.iteritems():
             items[key] = self.render_data("%s[%s]" % (name, "_" + key),
-                                          value, path + [key])
+                                          value, path + [key], with_templates=with_templates)
         return render_to_string("djson_field/dictionary_item.html", {
             'name': name,
             'items': items,
@@ -115,7 +122,7 @@ class JSONWidget(Textarea):
         rules = rules or self.get_rules(path)
         items = []
         for i in xrange(len(data)):
-            items.append(self.render_data("%s[%i]" % (name, i), data[i], path))
+            items.append(self.render_data("%s[%i]" % (name, i), data[i], path, with_templates=with_templates))
         return render_to_string("djson_field/list_item.html", {
             'name': name,
             'items': items,
@@ -124,11 +131,13 @@ class JSONWidget(Textarea):
             'rules': rules
         })
 
-    def render_plain(self, name, data=u"", path=[], rules=None):
+    def render_plain(self, name, data=u"", path=[], rules=None, with_templates=True):
         rules = rules or self.get_rules(path)
         field = rules.get('type')
         if field:
-            field = field.widget.render(name, unicode(data))
+            field = field.formfield().widget.render(name, unicode(data))
+            if not with_templates:
+                field = field.replace('name="%%NAME%%"', '_name="%%NAME%%"')
             match = re.match(r'<[a-zA-Z0-9._]+\s+', field)
             if match:
                 field = field[:match.end()] + ' class="jsonFieldItemValue" ' +\
@@ -137,16 +146,16 @@ class JSONWidget(Textarea):
             'name': name,
             'field': field,
             'value': unicode(data),
-            'rules': rules
+            'rules': rules,
         })
 
-    def render_data(self, name, data, path=[]):
+    def render_data(self, name, data, path=[], with_templates=True):
         if type(data) == dict:
-            return self.render_dict(name, data, path)
+            return self.render_dict(name, data, path, with_templates=True)
         elif type(data) == list:
-            return self.render_list(name, data, path)
+            return self.render_list(name, data, path, with_templates=True)
         else:
-            return self.render_plain(name, data, path)
+            return self.render_plain(name, data, path, with_templates=True)
 
     def render(self, name, value, attrs=None):
         json_dict = {}

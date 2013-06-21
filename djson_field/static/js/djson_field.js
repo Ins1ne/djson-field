@@ -23,6 +23,7 @@ $(document).ready(function(e){
 		if(templates.size() > 0){
 			if($(this).hasClass("add_plain")){
 				var item = templates.children(".plain").html().replace(/%%NAME%%/g, name);
+				item = item.replace('_name="', 'name="')
 			} else if($(this).hasClass("add_list")){
 				var item = templates.children(".templates>.list").html().replace(/%%NAME%%/g, name);
 			} else if($(this).hasClass("add_dict")){
