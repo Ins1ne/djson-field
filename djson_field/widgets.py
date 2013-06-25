@@ -32,6 +32,22 @@ def update_tree(tree, path, value):
     return tree
 
 
+def parse_name(name):
+    nodes = []
+    node = u""
+    is_start = False
+    for char in name:
+        if char == "[":
+            is_start = True
+        elif char == "]":
+            nodes.append(node)
+            node = u""
+            is_start = False
+        elif is_start:
+            node += char
+    return nodes
+
+
 def remove_empty_items(tree):
     if type(tree) == list:
         return [remove_empty_items(ob) for ob in tree if ob is not None]
@@ -170,7 +186,7 @@ class JSONWidget(Textarea):
         value = {}
         for key, val in data.iteritems():
             if key.startswith(name + "["):
-                branch_keys = re.findall(r'\[([A-Za-z0-9_.]*)\]', key)
+                branch_keys = parse_name(key)
                 value = update_tree(value, branch_keys, val)
         value = remove_empty_items(value)
         return json.dumps(value)
