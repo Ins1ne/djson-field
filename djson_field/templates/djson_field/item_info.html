@@ -1,0 +1,12 @@
+{% if with_name %}
+    <label for="id_{{ name }}[_{{ key }}]">
+        {% if rules.verbose_name %}
+            {{ rules.verbose_name }}
+        {% else %}
+            {{ key }}
+        {% endif %}
+    </label>
+    {% if rules.help_text %}
+        <p>{{ rules.help_text|safe }}</p>
+    {% endif %}
+{% endif %}

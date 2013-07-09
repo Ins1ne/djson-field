@@ -9,20 +9,20 @@ import re
 def update_tree(tree, path, value):
     if len(path) > 0:
         is_add = value not in ["__KEEP_LIST__", "__KEEP_DICT__"]
-        if path[0].isdigit() and (not tree or type(tree) == list):
-            if not tree:
-                tree = []
-            if is_add or len(path) > 1:
-                index = int(path[0])
-                while len(tree) <= index:
-                    tree.append(None)
-        else:
+        if path[0].startswith("_"):
             if not tree:
                 tree = {}
             if is_add or len(path) > 1:
                 index = path[0]
                 if index.startswith("_"):
                     index = index[1:]
+        else:
+            if not tree:
+                tree = []
+            if is_add or len(path) > 1:
+                index = int(path[0])
+                while len(tree) <= index:
+                    tree.append(None)
 
         if len(path) == 1:
             if is_add:
@@ -119,14 +119,19 @@ class JSONWidget(Textarea):
         }
 
     def render_dict(self, name, data={}, path=[], rules=None,
-                    with_templates=True):
+                    with_templates=True, with_name=False):
         rules = rules or self.get_rules(path)
         items = {}
         for key, value in data.iteritems():
-            items[key] = self.render_data("%s[%s]" % (name, "_" + key),
-                                          value, path + [key], with_templates=with_templates)
+            _ = self.get_rules(path + [key])
+            if not _.get('hidden'):
+                items[key] = self.render_data("%s[%s]" % (name, "_" + key),
+                                              value, path + [key], with_templates=with_templates, with_name=True,
+                                              rules=_)
         return render_to_string("djson_field/dictionary_item.html", {
+            'with_name': with_name,
             'name': name,
+            'key': path[-1] if len(path) > 0 else None,
             'items': items,
             'controls': self.add_links_template(rules),
             'templates': with_templates and self.get_templates(path),
@@ -134,20 +139,22 @@ class JSONWidget(Textarea):
         })
 
     def render_list(self, name, data=[], path=[], rules=None,
-                    with_templates=True):
+                    with_templates=True, with_name=False):
         rules = rules or self.get_rules(path)
         items = []
         for i in xrange(len(data)):
             items.append(self.render_data("%s[%i]" % (name, i), data[i], path, with_templates=with_templates))
         return render_to_string("djson_field/list_item.html", {
+            'with_name': with_name,
             'name': name,
             'items': items,
+            'key': path[-1] if len(path) > 0 else None,
             'controls': self.add_links_template(rules),
             'templates': with_templates and self.get_templates(path),
             'rules': rules
         })
 
-    def render_plain(self, name, data=u"", path=[], rules=None, with_templates=True):
+    def render_plain(self, name, data=u"", path=[], rules=None, with_templates=True, with_name=False):
         rules = rules or self.get_rules(path)
         field = rules.get('type')
         if field:
@@ -159,19 +166,21 @@ class JSONWidget(Textarea):
                 field = field[:match.end()] + ' class="jsonFieldItemValue" ' +\
                     field[match.end():]
         return render_to_string("djson_field/plain_item.html", {
+            'with_name': with_name,
             'name': name,
+            'key': path[-1] if len(path) > 0 else name,
             'field': field,
             'value': unicode(data),
             'rules': rules,
         })
 
-    def render_data(self, name, data, path=[], with_templates=True):
+    def render_data(self, name, data, path=[], with_templates=True, with_name=False):
         if type(data) == dict:
-            return self.render_dict(name, data, path, with_templates=True)
+            return self.render_dict(name, data, path, with_templates=True, with_name=with_name)
         elif type(data) == list:
-            return self.render_list(name, data, path, with_templates=True)
+            return self.render_list(name, data, path, with_templates=True, with_name=with_name)
         else:
-            return self.render_plain(name, data, path, with_templates=True)
+            return self.render_plain(name, data, path, with_templates=True, with_name=with_name)
 
     def render(self, name, value, attrs=None):
         json_dict = {}

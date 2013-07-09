@@ -17,8 +17,12 @@ class JSONField(models.TextField):
     BASE_RULES = [
         ([_(r'.*')], {
             'type': models.CharField(max_length=""),
+            'type_key': models.CharField(max_length=""),
             'actions': ['add_plain', 'add_list', 'add_dict'],
-            'allow_removing': True
+            'allow_removing': True,
+            'verbose_name': None,
+            'help_text': None,
+            'hidden': False
         }),
     ]
 
@@ -26,10 +30,13 @@ class JSONField(models.TextField):
         self.rules = self.BASE_RULES
         self.additional_rules = kwargs.get('rules', [])
         self.initial = kwargs.get('initial', None)
+        self.additional_validators = kwargs.get('additional_validators', [])
         if 'rules' in kwargs:
             del kwargs['rules']
         if 'initial' in kwargs:
             del kwargs['initial']
+        if 'additional_validators' in kwargs:
+            del kwargs['additional_validators']
         super(JSONField, self).__init__(*args, **kwargs)
 
     def formfield(self, **kwargs):
@@ -60,7 +67,7 @@ class JSONField(models.TextField):
             rules = field.widget.get_rules(path)
             field_type = rules['type']
             try:
-                field_type.clean(item, model_instance)
+                field_type.formfield().clean(item)
             except ValidationError as e:
                 for msg in e.messages:
                     path = [unicode(ob) for ob in path]
@@ -71,6 +78,8 @@ class JSONField(models.TextField):
         cleaned_data = super(JSONField, self).clean(value, model_instance)
         item = json.loads(value)
         errors = self.validate_item(item, model_instance)
+        for validator in self.additional_validators:
+            errors += validator(value)
         if len(errors) > 0:
             raise ValidationError(errors)
         return cleaned_data

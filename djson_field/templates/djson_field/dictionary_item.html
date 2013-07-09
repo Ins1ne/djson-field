@@ -1,3 +1,4 @@
+{% include 'djson_field/item_info.html' with rules=rules name=name key=key %}
 <ul class="jsonFieldDict jsonFieldItemValue"
 		name="{{ name }}">
 	{% for key, item in items.iteritems %}
@@ -5,13 +6,12 @@
 			{% if rules.allow_removing %}
 				<a href="#" class="deleteItem">Удалить</a>
 			{% endif %}
-			<label for="id_{{ name }}[_{{ key }}]">{{ key }}</label>
 			{{ item|safe }}
 		</li>
 	{% endfor %}
 	{{ controls|safe }}
 	{% if templates %}
-		<li class="hidden"><input name="{{ name }}[]" value="__KEEP_DICT__" /></li>
+		<li class="hidden"><input name="{{ name }}[_]" value="__KEEP_DICT__" /></li>
 		<li class="templates">{% include "djson_field/item_templates.html" %}</li>
 	{% endif %}
 </ul>
