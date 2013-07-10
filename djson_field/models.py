@@ -19,7 +19,7 @@ class JSONField(models.TextField):
             'type': models.CharField(max_length=""),
             'type_key': models.CharField(max_length=""),
             'actions': ['add_plain', 'add_list', 'add_dict'],
-            'allow_removing': True,
+            'allow_removing': False,
             'verbose_name': None,
             'help_text': None,
             'hidden': False

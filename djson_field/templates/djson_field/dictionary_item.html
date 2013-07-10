@@ -1,4 +1,4 @@
-{% include 'djson_field/item_info.html' with rules=rules name=name key=key %}
+{% include 'djson_field/item_info.html' with rules=rules name=name key=key field_key=field_key %}
 <ul class="jsonFieldDict jsonFieldItemValue"
 		name="{{ name }}">
 	{% for key, item in items.iteritems %}
