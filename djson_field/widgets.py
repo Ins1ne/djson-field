@@ -3,6 +3,7 @@ from django.forms.widgets import Textarea
 from django.template.loader import render_to_string
 
 import json
+import string
 import re
 
 
@@ -13,9 +14,8 @@ def update_tree(tree, path, value):
             if not tree:
                 tree = {}
             if is_add or len(path) > 1:
-                index = path[0]
-                if index.startswith("_"):
-                    index = index[1:]
+                index = path[0][1:]
+                tree[index] = None
         else:
             if not tree:
                 tree = []
@@ -23,12 +23,11 @@ def update_tree(tree, path, value):
                 index = int(path[0])
                 while len(tree) <= index:
                     tree.append(None)
-
         if len(path) == 1:
             if is_add:
                 tree[index] = value
         else:
-            tree[index] = update_tree(tree.get(index), path[1:], value)
+            tree[index] = update_tree(tree[index], path[1:], value)
     return tree
 
 
@@ -46,6 +45,10 @@ def parse_name(name):
         elif is_start:
             node += char
     return nodes
+
+
+def get_name_by_path(base, path):
+    return base + string.join(["[%s]" % ob for ob in path])
 
 
 def remove_empty_items(tree):
@@ -128,7 +131,7 @@ class JSONWidget(Textarea):
         for key, value in data.iteritems():
             _ = self.get_rules(path + [key])
             if not _.get('hidden'):
-                _field_key = rules['type_key'].formfield().widget.render("field_key", key)
+                _field_key = rules['type_key'] and rules['type_key'].formfield().widget.render("field_key", key)
                 items[key] = self.render_data("%s[%s]" % (name, "_" + key),
                                               value, path + [key], with_templates=with_templates, with_name=True,
                                               rules=_, field_key=_field_key)
@@ -179,13 +182,22 @@ class JSONWidget(Textarea):
             'rules': rules,
         })
 
-    def render_data(self, name, data, path=[], rules=None, with_templates=True, with_name=False, field_key=None):
+    def render_data(self, name, data, path=[]):
+        rules = self.get_rules(path)
         if type(data) == dict:
-            return self.render_dict(name, data, path, with_templates=True, with_name=with_name, field_key=field_key)
+            items = data.iteritems()
         elif type(data) == list:
-            return self.render_list(name, data, path, with_templates=True, with_name=with_name, field_key=field_key)
+            items = ((None, ob) for ob in data)
         else:
-            return self.render_plain(name, data, path, with_templates=True, with_name=with_name, field_key=field_key)
+            name = get_name_by_path(path)
+            return render_to_string("djson_field/plain_item.html", {
+                'field': field,
+                'field_key': field_key,
+                'name': name,
+                'key': path[-1] if len(path) > 0 else name,
+                'value': unicode(data),
+                'rules': rules,
+            })
 
     def render(self, name, value, attrs=None):
         json_dict = {}

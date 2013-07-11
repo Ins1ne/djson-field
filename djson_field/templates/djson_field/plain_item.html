@@ -1,2 +1,5 @@
 {% include 'djson_field/item_info.html' with rules=rules name=name key=key %}
+{% if rules.allow_removing %}
+    <a href="#" class="deleteItem">Удалить</a>
+{% endif %}
 {{ field|safe }}

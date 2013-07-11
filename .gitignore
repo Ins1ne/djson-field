@@ -1,6 +1,7 @@
 *.log
 *.pot
 *.pyc
+env
 dist
 djson_field.egg-info
 local_settings.py

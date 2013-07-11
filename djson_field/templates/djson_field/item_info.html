@@ -1,5 +1,7 @@
 {% if with_name %}
-    <div class="keyField">{{ field_key|safe }}</div>
+    {% if field_key %}
+        <div class="keyField">{{ field_key|safe }}</div>
+    {% endif %}
     <label for="id_{{ name }}[_{{ key }}]">
         {% if rules.verbose_name %}
             {{ rules.verbose_name }}
