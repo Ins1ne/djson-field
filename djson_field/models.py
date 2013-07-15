@@ -22,7 +22,7 @@ class JSONField(models.TextField):
             'allow_removing': True,
             'verbose_name': None,
             'help_text': None,
-            'hidden': False
+            'hidden': False,
         }),
     ]
 

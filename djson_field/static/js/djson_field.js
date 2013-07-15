@@ -45,12 +45,14 @@ $(document).ready(function(e){
 
 function updateNames(e){
 	var cur_name = $(this).attr('name').substring(2);
-	var new_name = cur_name.replace(/\[[^\]]*\]$/g, '[' + $(this).val() + ']');
+	var new_name = cur_name.replace(/\[_[^\]]*\]$/g, '[_' + $(this).val() + ']');
 	console.log("cur_name: ", cur_name);
 	console.log("new_name: ", new_name);
 	$(this).attr('value', $(this).val());
 	html = $(this).parent().parent().html().split(cur_name).join(new_name);
 	$(this).parent().parent().html(html);
+	var key_element = $('*[name="__' + new_name + '"]');
+	key_element.focus().val(key_element.val())
 }
 
 function getTemplates(node){
