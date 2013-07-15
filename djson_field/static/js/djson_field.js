@@ -29,10 +29,7 @@ $(document).ready(function(e){
 			} else if($(this).hasClass("add_dict")){
 				var item = templates.children(".templates>.dict").html().replace(/%%NAME%%/g, name);
 			}
-			var li = "<li class=\"jsonFieldItem\">" +
-						'<a href="#" class="deleteItem">Удалить</a> ' +
-						(isLabel ? label : "") + item + 
-						'</li>';
+			var li = "<li class=\"jsonFieldItem\">" + item + '</li>';
 			$(this).parent().before(li);
 		} else {
 			alert("Не удалось найти шаблон для сущности");
@@ -42,7 +39,19 @@ $(document).ready(function(e){
 		e.preventDefault()
 		$(this).parent().remove();
 	});
+	$(document).delegate('.jsonFieldWidget .jsonFieldItem>.keyField>*', 'change', updateNames);
+	$(document).delegate('.jsonFieldWidget .jsonFieldItem>.keyField>*', 'keyup', updateNames);
 });
+
+function updateNames(e){
+	var cur_name = $(this).attr('name').substring(2);
+	var new_name = cur_name.replace(/\[[^\]]*\]$/g, '[' + $(this).val() + ']');
+	console.log("cur_name: ", cur_name);
+	console.log("new_name: ", new_name);
+	$(this).attr('value', $(this).val());
+	html = $(this).parent().parent().html().split(cur_name).join(new_name);
+	$(this).parent().parent().html(html);
+}
 
 function getTemplates(node){
 	var templates = node.children('.templates');

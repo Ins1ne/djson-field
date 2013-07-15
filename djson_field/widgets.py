@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
 from django.forms.widgets import Textarea
 from django.template.loader import render_to_string
 
@@ -48,7 +49,7 @@ def parse_name(name):
 
 
 def get_name_by_path(base, path):
-    return base + string.join(["[%s]" % ob for ob in path])
+    return base + string.join(["[%s]" % ob for ob in path], '')
 
 
 def remove_empty_items(tree):
@@ -131,7 +132,9 @@ class JSONWidget(Textarea):
         for key, value in data.iteritems():
             _ = self.get_rules(path + [key])
             if not _.get('hidden'):
-                _field_key = rules['type_key'] and rules['type_key'].formfield().widget.render("field_key", key)
+                _field_key = rules['type_key'] and\
+                    rules['type_key'].formfield().widget.render("field_key",
+                                                                key)
                 items[key] = self.render_data("%s[%s]" % (name, "_" + key),
                                               value, path + [key], with_templates=with_templates, with_name=True,
                                               rules=_, field_key=_field_key)
@@ -182,27 +185,48 @@ class JSONWidget(Textarea):
             'rules': rules,
         })
 
-    def render_data(self, name, data, path=[]):
+    def render_data(self, name, data, path=[], with_templates=True):
         rules = self.get_rules(path)
-        if type(data) == dict:
-            items = data.iteritems()
-        elif type(data) == list:
-            items = ((None, ob) for ob in data)
+        key = path[-1] if len(path) > 0 else None
+        field_name = get_name_by_path(name, path)
+        field = rules['type'].formfield().widget.render(field_name, unicode(data))
+        match = re.match(r'<[a-zA-Z0-9._]+\s+', field)
+        if match:
+            field = field[:match.end()] + ' class="jsonFieldItemValue" ' + field[match.end():]
+        field_key = rules['type_key'] and rules['type_key'].formfield().widget.render("__%s" % field_name, key)
+        match = re.match(r'<[a-zA-Z0-9._]+\s+', field_key)
+        if match:
+            field_key = field_key[:match.end()] + ' class="jsonFieldItemKey" ' + field_key[match.end():]
+        params = {
+            'field': field,
+            'field_key': field_key,
+            'name': field_name,
+            'key': key if not isinstance(key, int) else None,
+            'controls': self.add_links_template(rules),
+            'rules': rules,
+            'templates': with_templates and self.get_templates(path + (isinstance(key, int) and [0] or ['']))
+        }
+        if isinstance(data, dict):
+            params['items'] = OrderedDict(
+                [(key, self.render_data(name, ob, path + [key])) for key, ob in data.iteritems()])
+            template = "djson_field/dictionary_item.html"
+        elif isinstance(data, list):
+            params['items'] = ((None, self.render_data(name, ob, path + [i])) for i, ob in enumerate(data))
+            template = "djson_field/list_item.html"
         else:
-            name = get_name_by_path(path)
-            return render_to_string("djson_field/plain_item.html", {
-                'field': field,
-                'field_key': field_key,
-                'name': name,
-                'key': path[-1] if len(path) > 0 else name,
-                'value': unicode(data),
-                'rules': rules,
-            })
+            params['value'] = data
+            template = "djson_field/plain_item.html"
+        return render_to_string(template, params)
 
     def render(self, name, value, attrs=None):
         json_dict = {}
         if value and len(value) > 0:
             json_dict = json.loads(value)
+        json_dict = OrderedDict([
+            ('a', 1),
+            ('b', [2, 3, 4]),
+            ('c', {"c.1": 5, "c.2": 6})
+        ])
         html = self.render_data(name, json_dict)
         return render_to_string("djson_field/base.html", {
             'content': html
