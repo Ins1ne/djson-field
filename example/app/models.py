@@ -2,7 +2,8 @@
 
 from django.db import models
 from djson_field.models import JSONField
-
+import re
+_ = re.compile
 
 def get_rules():
     return [
@@ -12,6 +13,11 @@ def get_rules():
                 'field2': models.CharField(max_length=255)
             },
             'actions': ['add_plain'],
+            'allow_item_removing': False
+        }),
+        (['key', _(r'.*')], {
+            'type': models.CharField(max_length=255),
+            'actions': [],
             'allow_item_removing': False
         }),
     ]

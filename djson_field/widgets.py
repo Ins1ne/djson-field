@@ -116,22 +116,24 @@ class JSONWidget(Textarea):
         return rules
 
     def get_templates(self, path):
+        rules = self.get_rules(path)
         return {
-            'dict': self.render_data('%%NAME%%', {}, path=path,
-                                     with_templates=False),
-            'list': self.render_data('%%NAME%%', [], path=path,
-                                     with_templates=False),
-            'plain': self.render_data('%%NAME%%', u"", path=path,
-                                      with_templates=False)
+            'dict': self.render_data('%%NAME%%', {}, path=[],
+                                     with_templates=False, rules=rules),
+            'list': self.render_data('%%NAME%%', [], path=[],
+                                     with_templates=False, rules=rules),
+            'plain': self.render_data('%%NAME%%', u"", path=[],
+                                      with_templates=False, rules=rules)
         }
 
-    def render_field(self, name, field, data, path):
+    def render_field(self, name, data, path, field = None, rules = None):
+        rules = rules if rules else self.get_rules(path)
+        field = field if field else rules['type']
         field_name = get_name_by_path(name, path)
+        print field_name, rules['type']
         if isinstance(field, dict):
             key = path[-1] if len(path) > 0 else None
-            rules = self.get_rules(path)
-            print name, path
-            items = OrderedDict([(key, self.render_field(name, ob, None, path + [key])) for key, ob in field.iteritems()])
+            items = OrderedDict([(key, self.render_field(name, None, path + [key], ob)) for key, ob in field.iteritems()])
             return render_to_string("djson_field/complex_field.html", {
                 'name': field_name,
                 'key': key if not isinstance(key, int) else None,
@@ -144,11 +146,11 @@ class JSONWidget(Textarea):
             field = field[:match.end()] + ' class="jsonFieldItemValue" ' + field[match.end():]
         return field
 
-    def render_data(self, name, data, path=[], with_templates=True):
-        rules = self.get_rules(path)
+    def render_data(self, name, data, path=[], rules=None, with_templates=True):
+        rules = rules or self.get_rules(path)
         key = path[-1] if len(path) > 0 else None
         field_name = get_name_by_path(name, path)
-        field = self.render_field(name, rules['type'], data, path)
+        field = self.render_field(name, data, path, rules=rules)
         field_key = rules['type_key'] and rules['type_key'].formfield().widget.render("__%s" % field_name, key)
         match = re.match(r'<[a-zA-Z0-9._]+\s+', field_key)
         if match:
@@ -178,11 +180,9 @@ class JSONWidget(Textarea):
         json_dict = {}
         if value and len(value) > 0:
             json_dict = json.loads(value)
-        # json_dict = OrderedDict([
-        #     ('key', []),
-        #     ('b', [2, 3, 4]),
-        #     ('c', {"c.1": 5, "c.2": 6})
-        # ])
+        json_dict = OrderedDict([
+            ('key', [{'field1': 1.1, 'field2': 2.1}, {'field1': 1.2, 'field2': 2.2}])
+        ])
         html = self.render_data(name, json_dict)
         return render_to_string("djson_field/base.html", {
             'content': html
