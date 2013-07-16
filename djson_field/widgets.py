@@ -125,28 +125,30 @@ class JSONWidget(Textarea):
                                       with_templates=False)
         }
 
-    def render_field(self, name, field, path):
+    def render_field(self, name, field, data, path):
         field_name = get_name_by_path(name, path)
         if isinstance(field, dict):
             key = path[-1] if len(path) > 0 else None
             rules = self.get_rules(path)
-            items = OrderedDict([(key, self.render_field(name, ob, path + [key])) for key, ob in field.iteritems()])
-            return render_to_string("djson_field/dictionary_item.html", {
+            print name, path
+            items = OrderedDict([(key, self.render_field(name, ob, None, path + [key])) for key, ob in field.iteritems()])
+            return render_to_string("djson_field/complex_field.html", {
                 'name': field_name,
                 'key': key if not isinstance(key, int) else None,
                 'rules': rules,
                 'items': items
             })
-        return field.formfield().widget.render(field_name, None)
+        field = field.formfield().widget.render(field_name, data)
+        match = re.match(r'<[a-zA-Z0-9._]+\s+', field)
+        if match:
+            field = field[:match.end()] + ' class="jsonFieldItemValue" ' + field[match.end():]
+        return field
 
     def render_data(self, name, data, path=[], with_templates=True):
         rules = self.get_rules(path)
         key = path[-1] if len(path) > 0 else None
         field_name = get_name_by_path(name, path)
-        field = self.render_field(name, rules['type'], path)
-        match = re.match(r'<[a-zA-Z0-9._]+\s+', field)
-        if match:
-            field = field[:match.end()] + ' class="jsonFieldItemValue" ' + field[match.end():]
+        field = self.render_field(name, rules['type'], data, path)
         field_key = rules['type_key'] and rules['type_key'].formfield().widget.render("__%s" % field_name, key)
         match = re.match(r'<[a-zA-Z0-9._]+\s+', field_key)
         if match:
@@ -176,11 +178,11 @@ class JSONWidget(Textarea):
         json_dict = {}
         if value and len(value) > 0:
             json_dict = json.loads(value)
-        json_dict = OrderedDict([
-            ('key', []),
-            ('b', [2, 3, 4]),
-            ('c', {"c.1": 5, "c.2": 6})
-        ])
+        # json_dict = OrderedDict([
+        #     ('key', []),
+        #     ('b', [2, 3, 4]),
+        #     ('c', {"c.1": 5, "c.2": 6})
+        # ])
         html = self.render_data(name, json_dict)
         return render_to_string("djson_field/base.html", {
             'content': html

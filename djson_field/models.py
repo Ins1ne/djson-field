@@ -67,7 +67,8 @@ class JSONField(models.TextField):
             rules = field.widget.get_rules(path)
             field_type = rules['type']
             try:
-                field_type.formfield().clean(item)
+                if isinstance(field_type, models.Field):
+                    field_type.formfield().clean(item)
             except ValidationError as e:
                 for msg in e.messages:
                     path = [unicode(ob) for ob in path]
