@@ -1,0 +1,9 @@
+<ul class="jsonFieldDict jsonFieldItemValue"
+		name="{{ name }}">
+	{% for key, item in items.iteritems %}
+		<li class="jsonFieldItem">
+			<label>{{ key }}</label>
+			{{ item|safe }}
+		</li>
+	{% endfor %}
+</ul>
