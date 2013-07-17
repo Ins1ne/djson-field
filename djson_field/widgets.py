@@ -123,7 +123,7 @@ class JSONWidget(Textarea):
                                      with_templates=False, rules=rules),
             'list': self.render_data('%%NAME%%', [], path=[],
                                      with_templates=False, rules=rules),
-            'plain': self.render_data('%%NAME%%', u"", path=[],
+            'plain': self.render_data('%%NAME%%', u"sadf", path=[],
                                       with_templates=False, rules=rules)
         }
 
@@ -152,9 +152,10 @@ class JSONWidget(Textarea):
         field_name = get_name_by_path(name, path)
         field = self.render_field(name, data, path, rules=rules)
         field_key = rules['type_key'] and rules['type_key'].formfield().widget.render("__%s" % field_name, key)
-        match = re.match(r'<[a-zA-Z0-9._]+\s+', field_key)
-        if match:
-            field_key = field_key[:match.end()] + ' class="jsonFieldItemKey" ' + field_key[match.end():]
+        if field_key:
+            match = re.match(r'<[a-zA-Z0-9._]+\s+', field_key)
+            if match:
+                field_key = field_key[:match.end()] + ' class="jsonFieldItemKey" ' + field_key[match.end():]
         params = {
             'field': field,
             'field_key': field_key,
