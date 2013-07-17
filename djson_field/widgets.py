@@ -117,6 +117,7 @@ class JSONWidget(Textarea):
 
     def get_templates(self, path):
         rules = self.get_rules(path)
+        print path, rules['type']
         return {
             'dict': self.render_data('%%NAME%%', {}, path=[],
                                      with_templates=False, rules=rules),
@@ -130,7 +131,6 @@ class JSONWidget(Textarea):
         rules = rules if rules else self.get_rules(path)
         field = field if field else rules['type']
         field_name = get_name_by_path(name, path)
-        print field_name, rules['type']
         if isinstance(field, dict):
             key = path[-1] if len(path) > 0 else None
             items = OrderedDict([(key, self.render_field(name, None, path + [key], ob)) for key, ob in field.iteritems()])
@@ -180,9 +180,9 @@ class JSONWidget(Textarea):
         json_dict = {}
         if value and len(value) > 0:
             json_dict = json.loads(value)
-        json_dict = OrderedDict([
-            ('key', [{'field1': 1.1, 'field2': 2.1}, {'field1': 1.2, 'field2': 2.2}])
-        ])
+        # json_dict = OrderedDict([
+        #     ('key', [{'field1': 1.1, 'field2': 2.1}, {'field1': 1.2, 'field2': 2.2}])
+        # ])
         html = self.render_data(name, json_dict)
         return render_to_string("djson_field/base.html", {
             'content': html

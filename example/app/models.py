@@ -5,9 +5,10 @@ from djson_field.models import JSONField
 import re
 _ = re.compile
 
+
 def get_rules():
     return [
-        (['key'], {
+        (['key', _(r'.*')], {
             'type': {
                 'field1': models.IntegerField(),
                 'field2': models.CharField(max_length=255)
@@ -15,7 +16,7 @@ def get_rules():
             'actions': ['add_plain'],
             'allow_item_removing': False
         }),
-        (['key', _(r'.*')], {
+        (['key', _(r'.*'), _(r'.*')], {
             'type': models.CharField(max_length=255),
             'actions': [],
             'allow_item_removing': False
