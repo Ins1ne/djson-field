@@ -117,7 +117,6 @@ class JSONWidget(Textarea):
 
     def get_templates(self, path):
         rules = self.get_rules(path)
-        print path, rules['type']
         return {
             'dict': self.render_data('%%NAME%%', {}, path=[],
                                      with_templates=False, rules=rules),
@@ -150,6 +149,7 @@ class JSONWidget(Textarea):
         rules = rules or self.get_rules(path)
         key = path[-1] if len(path) > 0 else None
         field_name = get_name_by_path(name, path)
+        print field_name, data
         field = self.render_field(name, data, path, rules=rules)
         field_key = rules['type_key'] and rules['type_key'].formfield().widget.render("__%s" % field_name, key)
         if field_key:
