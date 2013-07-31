@@ -15,11 +15,11 @@ class JSONField(models.TextField):
 
     description = 'JSON object'
     BASE_RULES = [
-        ([_(r'.*')], {
+        ([], {
             'type': models.CharField(max_length=""),
             'type_key': models.CharField(max_length=""),
-            'actions': ['add_plain', 'add_list', 'add_dict'],
-            'allow_removing': True,
+            'actions': [],  # ['add_plain', 'add_list', 'add_dict'],
+            'allow_removing': False,
             'verbose_name': None,
             'help_text': None,
             'hidden': False,
