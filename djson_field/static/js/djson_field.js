@@ -29,7 +29,9 @@ $(document).ready(function(e){
 			} else if($(this).hasClass("add_dict")){
 				var item = templates.children(".templates>.dict").html().replace(/%%NAME%%/g, name);
 			}
-			var li = "<li class=\"jsonFieldItem\">" + item + '</li>';
+			var li = "<li class=\"jsonFieldItem\">" +
+				(isLabel ? label : "") +
+				item + '</li>';
 			$(this).parent().before(li);
 		} else {
 			alert("Не удалось найти шаблон для сущности");
