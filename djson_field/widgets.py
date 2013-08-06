@@ -105,25 +105,21 @@ class JSONWidget(Textarea):
 
     def get_rules(self, path):
         rules = {}
-        if len(path) > 0:
-            for selectors, _rules in self.rules[::-1]:
-                if is_satisfy_selectors(selectors, path):
-                    for key, rule in _rules.iteritems():
-                        if key not in rules:
-                            rules[key] = rule
-        else:
-            return self.rules[0][1]
+        for selectors, _rules in self.rules[::-1]:
+            if is_satisfy_selectors(selectors, path):
+                for key, rule in _rules.iteritems():
+                    if key not in rules:
+                        rules[key] = rule
         return rules
 
     def get_templates(self, path):
         rules = self.get_rules(path)
-        print path, rules['type']
         return {
             'dict': self.render_data('%%NAME%%', {}, path=[],
                                      with_templates=False, rules=rules),
             'list': self.render_data('%%NAME%%', [], path=[],
                                      with_templates=False, rules=rules),
-            'plain': self.render_data('%%NAME%%', u"", path=[],
+            'plain': self.render_data('%%NAME%%', u"sadf", path=[],
                                       with_templates=False, rules=rules)
         }
 
@@ -152,9 +148,10 @@ class JSONWidget(Textarea):
         field_name = get_name_by_path(name, path)
         field = self.render_field(name, data, path, rules=rules)
         field_key = rules['type_key'] and rules['type_key'].formfield().widget.render("__%s" % field_name, key)
-        match = re.match(r'<[a-zA-Z0-9._]+\s+', field_key)
-        if match:
-            field_key = field_key[:match.end()] + ' class="jsonFieldItemKey" ' + field_key[match.end():]
+        if field_key:
+            match = re.match(r'<[a-zA-Z0-9._]+\s+', field_key)
+            if match:
+                field_key = field_key[:match.end()] + ' class="jsonFieldItemKey" ' + field_key[match.end():]
         params = {
             'field': field,
             'field_key': field_key,
