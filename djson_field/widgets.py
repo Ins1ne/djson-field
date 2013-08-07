@@ -198,4 +198,4 @@ class JSONWidget(Textarea):
         css = {
             'all': ('css/djson_field.css',)
         }
-        js = ('js/djson_field.js')
+        js = ('js/djson_field.js',)
