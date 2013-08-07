@@ -1,7 +1,7 @@
-$(document).ready(function(e){
-	$(document).delegate('.jsonFieldWidget .jsonFieldAddLink a', 'click', function(e){
+django.jQuery(document).ready(function(e){
+	django.jQuery(document).delegate('.jsonFieldWidget .jsonFieldAddLink a', 'click', function(e){
 		e.preventDefault();
-		var list = $(this).parent().parent();
+		var list = django.jQuery(this).parent().parent();
 		var last = list.children('.jsonFieldItem').last();
 		isLabel = true;
 		if(list.hasClass('jsonFieldDict')){
@@ -21,39 +21,39 @@ $(document).ready(function(e){
 		var label = "<label>" + key + "</label>";
 		var templates = getTemplates(list);
 		if(templates.size() > 0){
-			if($(this).hasClass("add_plain")){
+			if(django.jQuery(this).hasClass("add_plain")){
 				var item = templates.children(".plain").html().replace(/%%NAME%%/g, name);
 				item = item.replace('_name="', 'name="')
-			} else if($(this).hasClass("add_list")){
+			} else if(django.jQuery(this).hasClass("add_list")){
 				var item = templates.children(".templates>.list").html().replace(/%%NAME%%/g, name);
-			} else if($(this).hasClass("add_dict")){
+			} else if(django.jQuery(this).hasClass("add_dict")){
 				var item = templates.children(".templates>.dict").html().replace(/%%NAME%%/g, name);
 			}
 			var li = "<li class=\"jsonFieldItem\">" +
 				(isLabel ? label : "") +
 				item + '</li>';
-			$(this).parent().before(li);
+			django.jQuery(this).parent().before(li);
 		} else {
 			alert("Не удалось найти шаблон для сущности");
 		}
 	});
-	$(document).delegate('.jsonFieldWidget .jsonFieldItem>.deleteItem', 'click', function(e){
+	django.jQuery(document).delegate('.jsonFieldWidget .jsonFieldItem>.deleteItem', 'click', function(e){
 		e.preventDefault()
-		$(this).parent().remove();
+		django.jQuery(this).parent().remove();
 	});
-	$(document).delegate('.jsonFieldWidget .jsonFieldItem>.keyField>*', 'change', updateNames);
-	$(document).delegate('.jsonFieldWidget .jsonFieldItem>.keyField>*', 'keyup', updateNames);
+	django.jQuery(document).delegate('.jsonFieldWidget .jsonFieldItem>.keyField>*', 'change', updateNames);
+	django.jQuery(document).delegate('.jsonFieldWidget .jsonFieldItem>.keyField>*', 'keyup', updateNames);
 });
 
 function updateNames(e){
-	var cur_name = $(this).attr('name').substring(2);
-	var new_name = cur_name.replace(/\[_[^\]]*\]$/g, '[_' + $(this).val() + ']');
+	var cur_name = django.jQuery(this).attr('name').substring(2);
+	var new_name = cur_name.replace(/\[_[^\]]*\]django.jQuery/g, '[_' + django.jQuery(this).val() + ']');
 	console.log("cur_name: ", cur_name);
 	console.log("new_name: ", new_name);
-	$(this).attr('value', $(this).val());
-	html = $(this).parent().parent().html().split(cur_name).join(new_name);
-	$(this).parent().parent().html(html);
-	var key_element = $('*[name="__' + new_name + '"]');
+	django.jQuery(this).attr('value', django.jQuery(this).val());
+	html = django.jQuery(this).parent().parent().html().split(cur_name).join(new_name);
+	django.jQuery(this).parent().parent().html(html);
+	var key_element = django.jQuery('*[name="__' + new_name + '"]');
 	key_element.focus().val(key_element.val())
 }
 

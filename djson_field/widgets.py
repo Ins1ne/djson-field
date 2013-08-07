@@ -123,7 +123,7 @@ class JSONWidget(Textarea):
                                       with_templates=False, rules=rules)
         }
 
-    def render_field(self, name, data, path, field = None, rules = None):
+    def render_field(self, name, data, path, field=None, rules=None):
         rules = rules if rules else self.get_rules(path)
         field = field if field else rules['type']
         field_name = get_name_by_path(name, path)
@@ -198,4 +198,4 @@ class JSONWidget(Textarea):
         css = {
             'all': ('css/djson_field.css',)
         }
-        js = ('js/jquery.js', 'js/djson_field.js')
+        js = ('js/djson_field.js')
