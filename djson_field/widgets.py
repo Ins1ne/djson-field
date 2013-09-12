@@ -88,6 +88,8 @@ class JSONWidget(Textarea):
         "add_dict": u"словарь",
     }
 
+    NAME_PATTERN = "%%NAME%%"
+
     def __init__(self, rules=[], *args, **kwargs):
         self.rules = rules
         super(JSONWidget, self).__init__(*args, **kwargs)
@@ -115,11 +117,11 @@ class JSONWidget(Textarea):
     def get_templates(self, path):
         rules = self.get_rules(path)
         return {
-            'dict': self.render_data('%%NAME%%', {}, path=[],
+            'dict': self.render_data(self.NAME_PATTERN, {}, path=[],
                                      with_templates=False, rules=rules),
-            'list': self.render_data('%%NAME%%', [], path=[],
+            'list': self.render_data(self.NAME_PATTERN, [], path=[],
                                      with_templates=False, rules=rules),
-            'plain': self.render_data('%%NAME%%', u"sadf", path=[],
+            'plain': self.render_data(self.NAME_PATTERN, u"", path=[],
                                       with_templates=False, rules=rules)
         }
 
@@ -177,22 +179,26 @@ class JSONWidget(Textarea):
         json_dict = {}
         if value and len(value) > 0:
             json_dict = json.loads(value)
-        # json_dict = OrderedDict([
-        #     ('key', [{'field1': 1.1, 'field2': 2.1}, {'field1': 1.2, 'field2': 2.2}])
-        # ])
         html = self.render_data(name, json_dict)
         return render_to_string("djson_field/base.html", {
             'content': html
         })
 
     def value_from_datadict(self, data, files, name):
-        value = {}
+        value = None
         for key, val in data.iteritems():
-            if key.startswith(name + "["):
-                branch_keys = parse_name(key)
-                value = update_tree(value, branch_keys, val)
-        value = remove_empty_items(value)
-        return json.dumps(value)
+            if key.startswith(name):
+                if key.startswith(name + '['):
+                    branch_keys = parse_name(key)
+                    value = update_tree(value, branch_keys, val)
+                else:
+                    value = val
+                    break
+        if isinstance(value, list) or isinstance(value, dict):
+            value = remove_empty_items(value)
+        if value:
+            value = json.dumps(value)
+        return value
 
     class Media:
         css = {

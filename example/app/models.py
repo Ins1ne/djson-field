@@ -56,7 +56,11 @@ def get_initial2():
 
 class JSONModel(models.Model):
     title = models.CharField(u"Title", max_length=255)
-    simple_json_field = JSONField(u"JSON field", rules=get_rules, initial=get_initial)
+    default_field = JSONField(u"Default")
+    plain_field = JSONField(u"Plain", initial="")
+    list_field = JSONField(u"List", initial=[])
+    dict_field = JSONField(u"Dict", initial={})
+    complex_field = JSONField(u"JSON field", rules=get_rules, initial=get_initial)
     masked_json_field = JSONField(u"Masked field", initial=get_initial2, is_masked=True)
 
     def __unicode__(self):

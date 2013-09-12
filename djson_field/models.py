@@ -17,17 +17,20 @@ class JSONField(models.TextField):
     BASE_RULES = [
         ([], {
             'type': models.CharField(max_length=""),
-            'type_key': models.CharField(max_length=""),
-            'actions': [],  # ['add_plain', 'add_list', 'add_dict'],
+            'type_key': None,
+            'actions': ['add_plain', 'add_list', 'add_dict'],
             'allow_removing': False,
+            'allow_item_removing': False,
             'verbose_name': None,
             'help_text': None,
             'hidden': False,
         }),
+        ([_(".*")], {
+            'allow_removing': True,
+        }),
     ]
 
     def __init__(self, *args, **kwargs):
-        self.rules = self.BASE_RULES
         self.additional_rules = kwargs.pop('rules', [])
         self.initial = kwargs.pop('initial', {})
         self.additional_validators = kwargs.pop('additional_validators', [])
@@ -39,7 +42,7 @@ class JSONField(models.TextField):
         add_rules = self.additional_rules
         if hasattr(add_rules, '__call__'):
             add_rules = add_rules()
-        defaults['rules'] = self.rules + add_rules
+        defaults['rules'] = self.BASE_RULES + add_rules
         initial = self.initial
         if hasattr(initial, '__call__'):
             initial = initial()
@@ -52,12 +55,14 @@ class JSONField(models.TextField):
         errors = []
         if isinstance(item, dict):
             for key, subitem in item.iteritems():
-                errors += self.validate_item(subitem, model_instance,
-                                             path + [key])
+                errors += self.validate_item(
+                    subitem, model_instance, path + [key]
+                )
         elif isinstance(item, list):
             for i, subitem in enumerate(item):
-                errors += self.validate_item(subitem, model_instance,
-                                             path + [i])
+                errors += self.validate_item(
+                    subitem, model_instance, path + [i]
+                )
         else:
             field = self.formfield()
             rules = field.widget.get_rules(path)
@@ -73,7 +78,7 @@ class JSONField(models.TextField):
 
     def clean(self, value, model_instance):
         cleaned_data = super(JSONField, self).clean(value, model_instance)
-        item = json.loads(value)
+        item = json.loads(value) if value else None
         errors = self.validate_item(item, model_instance)
         for validator in self.additional_validators:
             errors += validator(value)
