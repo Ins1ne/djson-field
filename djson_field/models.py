@@ -28,15 +28,10 @@ class JSONField(models.TextField):
 
     def __init__(self, *args, **kwargs):
         self.rules = self.BASE_RULES
-        self.additional_rules = kwargs.get('rules', [])
-        self.initial = kwargs.get('initial', None)
-        self.additional_validators = kwargs.get('additional_validators', [])
-        if 'rules' in kwargs:
-            del kwargs['rules']
-        if 'initial' in kwargs:
-            del kwargs['initial']
-        if 'additional_validators' in kwargs:
-            del kwargs['additional_validators']
+        self.additional_rules = kwargs.pop('rules', [])
+        self.initial = kwargs.pop('initial', {})
+        self.additional_validators = kwargs.pop('additional_validators', [])
+        self.is_masked = kwargs.pop('is_masked', False)
         super(JSONField, self).__init__(*args, **kwargs)
 
     def formfield(self, **kwargs):
@@ -49,6 +44,7 @@ class JSONField(models.TextField):
         if hasattr(initial, '__call__'):
             initial = initial()
         defaults['initial'] = json.dumps(initial)
+        defaults['is_masked'] = self.is_masked
         defaults.update(kwargs)
         return super(JSONField, self).formfield(**defaults)
 
