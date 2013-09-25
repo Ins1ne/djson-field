@@ -1,5 +1,4 @@
 include LICENSE
-include README.rst
+include README.md
 recursive-include djson_field/static *
 recursive-include djson_field/templates *
-recursive-include docs *
