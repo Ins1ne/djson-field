@@ -10,6 +10,17 @@ import string
 _ = re.compile
 
 
+def wraps(cls):
+
+    def decor(decorated_class):
+        decorated_class.__module__ = cls.__module__
+        decorated_class.__name__ = cls.__name__
+        return decorated_class
+
+    return decor
+
+
+@wraps(models.TextField)
 class JSONField(models.TextField):
     """ Stores and loads valid JSON objects. """
 
