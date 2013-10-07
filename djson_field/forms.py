@@ -34,7 +34,7 @@ class JsonField(CharField):
         return super(JsonField, self).__init__(*args, **kwargs)
 
     def prepare_value(self, value):
-        value = value or ""
+        value = value or "{}"
         if self.is_masked:
             value = json.dumps(mask(
                 json.loads(self.initial), json.loads(value)
