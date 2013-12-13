@@ -10,7 +10,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='djson-field',
-    version='0.1.2',
+    version='0.1.3',
     packages=['djson_field'],
     install_requires=[
         'django>=1.4.5'
