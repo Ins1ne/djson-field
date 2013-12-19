@@ -29,7 +29,7 @@ class JSONField(models.TextField):
     description = 'JSON object'
     BASE_RULES = [
         ([], {
-            'type': models.CharField(max_length=""),
+            'type': models.CharField(max_length=250),
             'type_key': None,
             'actions': ['add_plain', 'add_list', 'add_dict'],
             'allow_removing': False,
