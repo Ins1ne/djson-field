@@ -1,14 +1,14 @@
 {% include 'djson_field/item_info.html' %}
 <ol class="jsonFieldList jsonFieldItemValue"
-		name="{{ name }}">
-	{% for i, item in items %}
-		<li class="jsonFieldItem">
-			{{ item|safe }}
-		</li>
-	{% endfor %}
-	{{ controls|safe }}
-	{% if templates %}
-		<li class="hidden"><input name="{{ name }}[]" value="__KEEP_LIST__" /></li>
-		<li class="templates">{% include "djson_field/item_templates.html" %}</li>
-	{% endif %}
+        name="{{ name }}">
+    {% for i, item in items %}
+        <li class="jsonFieldItem">
+            {{ item|safe }}
+        </li>
+    {% endfor %}
+    {{ controls|safe }}
+    {% if templates %}
+        <li class="hidden"><input name="{{ name }}[]" value="__KEEP_LIST__" /></li>
+        <li class="templates">{% include "djson_field/item_templates.html" %}</li>
+    {% endif %}
 </ol>

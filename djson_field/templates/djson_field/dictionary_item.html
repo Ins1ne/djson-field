@@ -1,14 +1,14 @@
 {% include 'djson_field/item_info.html' %}
 <ul class="jsonFieldDict jsonFieldItemValue"
-		name="{{ name }}">
-	{% for key, item in items.iteritems %}
-		<li class="jsonFieldItem">
-			{{ item|safe }}
-		</li>
-	{% endfor %}
-	{{ controls|safe }}
-	{% if templates %}
-		<li class="hidden"><input name="{{ name }}[_]" value="__KEEP_DICT__" /></li>
-		<li class="templates">{% include "djson_field/item_templates.html" %}</li>
-	{% endif %}
+        name="{{ name }}">
+    {% for key, item in items.iteritems %}
+        <li class="jsonFieldItem">
+            {{ item|safe }}
+        </li>
+    {% endfor %}
+    {{ controls|safe }}
+    {% if templates %}
+        <li class="hidden"><input name="{{ name }}[_]" value="__KEEP_DICT__" /></li>
+        <li class="templates">{% include "djson_field/item_templates.html" %}</li>
+    {% endif %}
 </ul>

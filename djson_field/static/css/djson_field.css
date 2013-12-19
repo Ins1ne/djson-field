@@ -16,3 +16,8 @@
 .jsonFieldWidget .jsonFieldItemValue>li.hidden {display:none;}
 
 form .jsonFieldWidget p {margin-left:0; padding-left:0;}
+
+.jsonFieldWidget label {
+    font-weight: bold !important;
+    padding: 3px 0px 0 5px !important;
+}
